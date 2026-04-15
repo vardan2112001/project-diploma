@@ -19,8 +19,6 @@ import java.util.List;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
-;
-
 
 
     public List<PlayerResponseDto> getTopPlayers(Pageable pageable) {
@@ -44,6 +42,7 @@ public class PlayerService {
                 .map(PlayerMapper::toDetailDto)
                 .toList();
     }
+
     public List<PlayerResponseDto> getPlayersByClusterRole(Integer clusterId, Pageable pageable) {
         return playerRepository.findByStatsClusterId(clusterId, pageable)
                 .stream()

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ForwardScoringStrategy implements PositionScoringStrategy {
 
-    // Вставляем коэффициенты, которые вычислила модель машинного обучения
+
     private static final double CONSTANT = 0.26077;
     private static final double WEIGHT_GOALS = 0.53613;
     private static final double WEIGHT_ASSISTS = 0.98370;

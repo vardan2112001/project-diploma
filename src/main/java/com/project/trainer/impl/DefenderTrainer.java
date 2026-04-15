@@ -2,7 +2,6 @@ package com.project.trainer.impl;
 
 import com.project.entity.Player;
 import com.project.entity.PlayerStats;
-import com.project.exceptions.PlayerNotFoundException;
 import com.project.repository.PlayerRepository;
 import com.project.trainer.PositionTrainer;
 import lombok.RequiredArgsConstructor;

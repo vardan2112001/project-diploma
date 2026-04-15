@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class PlayerAnalysisService {
@@ -37,7 +38,6 @@ public class PlayerAnalysisService {
                 return strategy.calculateScore(stats);
             }
         }
-
 
         return ZERO_SCORE;
     }

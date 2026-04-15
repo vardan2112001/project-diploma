@@ -1,7 +1,6 @@
 package com.project.service;
 
 
-import com.project.repository.PlayerRepository;
 import com.project.trainer.PositionTrainer;
 import lombok.RequiredArgsConstructor;
 
@@ -18,16 +17,13 @@ public class RegressionTrainingService {
 
     private final List<PositionTrainer> trainers;
 
-
-
     public void trainModels() {
-       log.info("=== REGRESSION ML STARTED) ===");
+        log.info("=== REGRESSION ML STARTED) ===");
 
         for (PositionTrainer trainer : trainers) {
             trainer.train();
         }
 
     }
-
 
 }

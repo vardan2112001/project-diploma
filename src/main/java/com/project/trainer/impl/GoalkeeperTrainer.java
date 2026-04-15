@@ -2,9 +2,7 @@ package com.project.trainer.impl;
 
 import com.project.entity.Player;
 import com.project.entity.PlayerStats;
-import com.project.exceptions.PlayerNotFoundException;
 import com.project.repository.PlayerRepository;
-
 import com.project.trainer.PositionTrainer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +19,7 @@ public class GoalkeeperTrainer implements PositionTrainer {
 
     private final PlayerRepository playerRepository;
 
-    private static final Integer  MIN_APPEARANCES = 5;
+    private static final Integer MIN_APPEARANCES = 5;
     private static final int PARAMS_FOR_FEATURES = 2;
     private static final int ZERO_WINS = 0;
     private static final int ZERO_SAVES = 0;
@@ -32,7 +30,7 @@ public class GoalkeeperTrainer implements PositionTrainer {
     public void train() {
         List<Player> goalkeepers = playerRepository.findGoalkeepers(MIN_APPEARANCES);
 
-        if (goalkeepers.isEmpty()){
+        if (goalkeepers.isEmpty()) {
             log.warn("No goalkeepers found for training");
         }
 
