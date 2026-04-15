@@ -12,16 +12,12 @@ import java.util.List;
 @Service
 public class PlayerAnalysisService {
 
-
-    private final List<PositionScoringStrategy> strategies;
     private static final Double ZERO_SCORE = 0.0;
     private static final Integer ZERO_MATCHES = 0;
-
+    private final List<PositionScoringStrategy> strategies;
 
     public double calculatePerformanceScore(Player player) {
         PlayerStats stats = player.getStats();
-
-
         if (stats == null || stats.getAppearances() == null || stats.getAppearances().equals(ZERO_MATCHES)) {
             return ZERO_SCORE;
         }
@@ -30,7 +26,6 @@ public class PlayerAnalysisService {
         if (position == null) {
             return ZERO_SCORE;
         }
-
         position = position.toUpperCase();
 
         for (PositionScoringStrategy strategy : strategies) {

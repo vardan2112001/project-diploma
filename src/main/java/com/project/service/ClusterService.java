@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 public class ClusterService {
 
-
     private static final int NUM_CLUSTERS = 4;
     private static final int MAX_ITERATIONS = 1000;
     private static final double DEFAULT_MAX_VALUE = 1.0;
@@ -33,12 +32,10 @@ public class ClusterService {
         log.info("Starts K-Means algorithm...");
 
         List<Player> players = playerRepository.findAllPlayersWithStats();
-
         if (players.isEmpty()) {
             log.warn("No data for clustering.");
             return;
         }
-
 
         double maxGoals = players.stream().mapToDouble(p -> p.getStats().getGoals()).max().orElse(DEFAULT_MAX_VALUE);
         double maxAssists = players.stream().mapToDouble(p -> p.getStats().getAssists()).max().orElse(DEFAULT_MAX_VALUE);
@@ -46,9 +43,7 @@ public class ClusterService {
         double maxApps = players.stream().mapToDouble(p -> p.getStats().getAppearances()).max().orElse(DEFAULT_MAX_VALUE);
 
 
-        List<PlayerWrapper> clusterInput = players.stream()
-                .map(p -> new PlayerWrapper(p, maxGoals, maxAssists, maxCleanSheets, maxApps))
-                .collect(Collectors.toList());
+        List<PlayerWrapper> clusterInput = players.stream().map(p -> new PlayerWrapper(p, maxGoals, maxAssists, maxCleanSheets, maxApps)).collect(Collectors.toList());
 
 
         KMeansPlusPlusClusterer<PlayerWrapper> clusterer = new KMeansPlusPlusClusterer<>(NUM_CLUSTERS, MAX_ITERATIONS);
@@ -59,13 +54,7 @@ public class ClusterService {
             CentroidCluster<PlayerWrapper> cluster = clusters.get(i);
             double[] center = cluster.getCenter().getPoint();
 
-            log.info("Cluster №{}: Players = {} | Center: Goals={}, Аssists={}, Clean sheets={}, Games={}",
-                    i,
-                    cluster.getPoints().size(),
-                    String.format("%.2f", center[0]),
-                    String.format("%.2f", center[1]),
-                    String.format("%.2f", center[2]),
-                    String.format("%.2f", center[3]));
+            log.info("Cluster №{}: Players = {} | Center: Goals={}, Аssists={}, Clean sheets={}, Games={}", i, cluster.getPoints().size(), String.format("%.2f", center[0]), String.format("%.2f", center[1]), String.format("%.2f", center[2]), String.format("%.2f", center[3]));
 
             for (PlayerWrapper wrapper : cluster.getPoints()) {
                 wrapper.getPlayer().getStats().setClusterId(i);
@@ -74,14 +63,13 @@ public class ClusterService {
 
 
         playerRepository.saveAll(players);
-        log.info("====== PLAYERS ANALYZING SUCCESFULLY  FINISHED======");
+        log.info("====== PLAYERS ANALYZZING SUCCESFULLY  FINISHED======");
     }
 
 
-
     private static class PlayerWrapper implements Clusterable {
-        private final double[] points;
         private static final int EQUALS_TO_ZERO = 0;
+        private final double[] points;
         @Getter
         private final Player player;
 

@@ -36,13 +36,11 @@ public class DatabaseSeederService {
         Map<String, Team> teamCache = new HashMap<>();
 
         for (CsvPlayerDto dto : parsedPlayers) {
-            Team team = teamCache.computeIfAbsent(dto.teamName(), name ->
-                    teamRepository.findByName(name).orElseGet(() -> {
-                        Team newTeam = new Team();
-                        newTeam.setName(name);
-                        return teamRepository.save(newTeam);
-                    })
-            );
+            Team team = teamCache.computeIfAbsent(dto.teamName(), name -> teamRepository.findByName(name).orElseGet(() -> {
+                Team newTeam = new Team();
+                newTeam.setName(name);
+                return teamRepository.save(newTeam);
+            }));
 
 
             Player player = CsvMapper.toPlayerEntity(dto, team);

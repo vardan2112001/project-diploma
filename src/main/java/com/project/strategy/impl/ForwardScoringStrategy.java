@@ -13,10 +13,10 @@ public class ForwardScoringStrategy implements PositionScoringStrategy {
     private static final double WEIGHT_ASSISTS = 0.98370;
     private static final double WEIGHT_SHOTS = -0.13763;
     private static final double ZERO_SCORE = 0.0;
-    private static final int  ZERO_APPEARANCES = 0;
-    private static final int  ZERO_GOALS = 0;
-    private static final int  ZERO_ASSISTS = 0;
-    private static final int  ZERO_SHOTS_ON_TARGET = 0;
+    private static final int ZERO_APPEARANCES = 0;
+    private static final int ZERO_GOALS = 0;
+    private static final int ZERO_ASSISTS = 0;
+    private static final int ZERO_SHOTS_ON_TARGET = 0;
     private static final int MUL_BY_TEN = 10;
 
     @Override

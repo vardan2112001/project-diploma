@@ -22,8 +22,6 @@ public class PlayerService {
 
 
     public List<PlayerResponseDto> getTopPlayers(Pageable pageable) {
-
-
         return playerRepository.findTopPlayers(pageable)
                 .stream()
                 .map(PlayerMapper::toDto)

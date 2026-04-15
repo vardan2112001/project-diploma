@@ -42,7 +42,6 @@ public class CsvMapper {
                 .build();
     }
 
-
     public static Player toPlayerEntity(CsvPlayerDto dto, Team team) {
         return Player.builder().
                 name(dto.name()).
@@ -51,10 +50,7 @@ public class CsvMapper {
                 nationality(dto.nationality()).
                 age(dto.age()).
                 team(team).build();
-
-
     }
-
 
     public static PlayerStats toPlayerStatsEntity(CsvPlayerDto dto, Player player) {
         return PlayerStats.builder().
@@ -66,10 +62,7 @@ public class CsvMapper {
                 assists(dto.assists()).
                 saves(dto.assists()).
                 player(player).build();
-
-
     }
-
 
     private static Integer parseIntSafe(String value) {
         if (value == null || value.isBlank()) return 0;

@@ -10,7 +10,7 @@ public class MidfielderScoringStrategy implements PositionScoringStrategy {
     private static final double CONSTANT = 0.33919;
     private static final double WEIGHT_GOALS = 0.53169;
     private static final double WEIGHT_ASSISTS = 0.10440;
-    private static final double  ZERO_SCORE = 0.0;
+    private static final double ZERO_SCORE = 0.0;
     private static final int ZERO_GOALS = 0;
     private static final int ZERO_ASSISTS = 0;
     private static final int ZERO_MATCHES = 0;

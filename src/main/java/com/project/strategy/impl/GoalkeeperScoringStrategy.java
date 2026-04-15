@@ -21,6 +21,7 @@ public class GoalkeeperScoringStrategy implements PositionScoringStrategy {
         String pos = position.toUpperCase();
         return pos.contains("GK") || pos.contains("GOALKEEPER");
     }
+
     @Override
     public double calculateScore(PlayerStats stats) {
         if (stats.getAppearances() == null || stats.getAppearances() == ZERO_APPEARANCES) return ZERO_SCORE;

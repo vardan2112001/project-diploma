@@ -2,6 +2,7 @@ package com.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 @Builder
 @Entity
 @Table(name = "player_stats")
