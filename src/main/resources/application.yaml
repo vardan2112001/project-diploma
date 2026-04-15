@@ -13,13 +13,13 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     hibernate:
-      # Hibernate больше не меняет базу! Он только проверяет структуру.
+   
       ddl-auto: validate
   liquibase:
-    # Указываем путь к главному файлу миграций
+
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-# Твои кастомные настройки
+
 app:
   import:
     file:
