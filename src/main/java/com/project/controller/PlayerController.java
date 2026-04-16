@@ -15,21 +15,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlayerController {
 
-    private final PlayerService playerService;
+    private final PlayerService playerServiceImpl;
 
     @GetMapping("/top")
     public List<PlayerResponseDto> getTopPlayers(@PageableDefault Pageable pageable) {
-        return playerService.getTopPlayers(pageable);
+        return playerServiceImpl.getTopPlayers(pageable);
     }
 
     @GetMapping("/{id}")
     public PlayerDetailDto getPlayerById(@PathVariable Long id) {
-        return playerService.getPlayerById(id);
+        return playerServiceImpl.getPlayerById(id);
     }
 
     @GetMapping("/search")
     public List<PlayerDetailDto> searchPlayers(@RequestParam String name) {
-        return playerService.searchPlayersByName(name);
+        return playerServiceImpl.searchPlayersByName(name);
     }
 
     @GetMapping("/role/{clusterId}")
@@ -37,6 +37,6 @@ public class PlayerController {
             @PathVariable Integer clusterId,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        return playerService.getPlayersByClusterRole(clusterId, pageable);
+        return playerServiceImpl.getPlayersByClusterRole(clusterId, pageable);
     }
 }

@@ -1,7 +1,8 @@
 package com.project.config;
 
-import com.project.service.CsvReaderService;
-import com.project.service.DatabaseSeederService;
+
+import com.project.service.DataSeeder;
+import com.project.service.PlayerReaderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -11,13 +12,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StartupApplicationListener {
 
-    private final CsvReaderService csvReaderService;
-    private final DatabaseSeederService databaseSeederService;
+    private final PlayerReaderService playerReaderService;
+    private final DataSeeder databaseSeederService;
 
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationEvent() {
-        var parsedData = csvReaderService.readPlayersFromFile();
+        var parsedData = playerReaderService.readPlayers();
 
         if (!parsedData.isEmpty()) {
             databaseSeederService.seedDatabase(parsedData);
