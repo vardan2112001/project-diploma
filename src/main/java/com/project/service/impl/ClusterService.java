@@ -1,8 +1,9 @@
-package com.project.service;
+package com.project.service.impl;
 
 import com.project.entity.Player;
 import com.project.entity.PlayerStats;
 import com.project.repository.PlayerRepository;
+import com.project.service.ClusterizationService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 
-public class ClusterService {
+public class ClusterService implements ClusterizationService {
 
     private static final int NUM_CLUSTERS = 4;
     private static final int MAX_ITERATIONS = 1000;
@@ -28,6 +29,7 @@ public class ClusterService {
     private final PlayerRepository playerRepository;
 
     @Transactional
+    @Override
     public void performClustering() {
         log.info("Starts K-Means algorithm...");
 

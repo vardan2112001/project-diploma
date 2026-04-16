@@ -1,4 +1,4 @@
-package com.project.service;
+package com.project.service.impl;
 
 import com.project.dto.CsvPlayerDto;
 import com.project.entity.Player;
@@ -7,6 +7,9 @@ import com.project.entity.Team;
 import com.project.mapper.CsvMapper;
 import com.project.repository.PlayerRepository;
 import com.project.repository.TeamRepository;
+import com.project.service.AnalysisService;
+import com.project.service.ClusterizationService;
+import com.project.service.DataSeeder;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,14 +22,15 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DatabaseSeederService {
+public class DatabaseSeederService implements DataSeeder {
 
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
-    private final PlayerAnalysisService playerAnalysisService;
-    private final ClusterService clusterService;
+    private final AnalysisService playerAnalysisService;
+    private final ClusterizationService clusterService;
 
     @Transactional
+    @Override
     public void seedDatabase(List<CsvPlayerDto> parsedPlayers) {
         if (playerRepository.existsByIdIsNotNull()) {
             log.info("====== DB IS FULL UNABLE IMPORT ======");

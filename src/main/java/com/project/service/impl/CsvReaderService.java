@@ -1,7 +1,8 @@
-package com.project.service;
+package com.project.service.impl;
 
 import com.project.dto.CsvPlayerDto;
 import com.project.mapper.CsvMapper;
+import com.project.service.PlayerReaderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,14 +14,14 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class CsvReaderService {
+public class CsvReaderService  implements PlayerReaderService {
 
     private static final int MIN_COLUMNS_REQUIRED = 48;
 
     @Value("${app.import.file.path}")
     private String filePath;
-
-    public List<CsvPlayerDto> readPlayersFromFile() {
+     @Override
+    public List<CsvPlayerDto> readPlayers() {
         List<CsvPlayerDto> parsedPlayers = new ArrayList<>();
         String line;
 
