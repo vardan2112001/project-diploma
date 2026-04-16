@@ -10,6 +10,7 @@ import com.project.repository.TeamRepository;
 import com.project.service.AnalysisService;
 import com.project.service.ClusterizationService;
 import com.project.service.DataSeeder;
+import com.project.service.RegressionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class DatabaseSeederService implements DataSeeder {
     private final TeamRepository teamRepository;
     private final AnalysisService playerAnalysisService;
     private final ClusterizationService clusterService;
+    private final RegressionService regressionService;
 
     @Transactional
     @Override
@@ -60,6 +62,7 @@ public class DatabaseSeederService implements DataSeeder {
         log.info("Players loaded in DB successfully ");
 
         clusterService.performClustering();
+        regressionService.trainModels();
 
         log.info("====== DB  INITIALIZED SUCCESSFULLY ======");
     }
