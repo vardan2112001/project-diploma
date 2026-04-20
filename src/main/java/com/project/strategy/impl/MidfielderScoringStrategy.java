@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class  MidfielderScoringStrategy implements PositionScoringStrategy {
 
-    private static final double CONSTANT = 0.33919;
-    private static final double WEIGHT_GOALS = 0.53169;
-    private static final double WEIGHT_ASSISTS = 0.10440;
+    private static final double CONSTANT = 0.33919261960863534;
+    private static final double WEIGHT_GOALS = 0.5316948393717102;
+    private static final double WEIGHT_ASSISTS =0.1044034432598294;
     private static final double ZERO_SCORE = 0.0;
     private static final int ZERO_GOALS = 0;
     private static final int ZERO_ASSISTS = 0;

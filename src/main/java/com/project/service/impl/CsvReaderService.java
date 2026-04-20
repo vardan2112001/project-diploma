@@ -26,15 +26,13 @@ public class CsvReaderService  implements PlayerReaderService {
         String line;
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
-            bufferedReader.readLine(); // Пропуск заголовка
-
+            bufferedReader.readLine();
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
 
                 String[] data = line.split(",",-1);
                 if (data.length < MIN_COLUMNS_REQUIRED) continue;
 
-                // Используем наш маппер
                 parsedPlayers.add(CsvMapper.toDto(data));
             }
             log.info("File readed correctly {}", parsedPlayers.size());

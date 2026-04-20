@@ -53,15 +53,16 @@ public class CsvMapper {
     }
 
     public static PlayerStats toPlayerStatsEntity(CsvPlayerDto dto, Player player) {
-        return PlayerStats.builder().
-                appearances(dto.appearances()).
-                wins(dto.appearances()).
-                goals(dto.goals()).
-                shotsOnTarget(dto.shotsOnTarget()).
-                cleanSheets(dto.cleanSheets()).
-                assists(dto.assists()).
-                saves(dto.assists()).
-                player(player).build();
+        return PlayerStats.builder()
+                .appearances(dto.appearances())
+                .wins(dto.wins())
+                .goals(dto.goals())
+                .shotsOnTarget(dto.shotsOnTarget())
+                .cleanSheets(dto.cleanSheets())
+                .assists(dto.assists())
+                .saves(dto.saves())
+                .player(player)
+                .build();
     }
 
     private static Integer parseIntSafe(String value) {

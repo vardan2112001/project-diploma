@@ -5,7 +5,7 @@ import lombok.*;
 
 @Builder
 @Entity
-@Table(name = "player_stats")
+@Table(name="player_stats")
 @Getter
 @Setter
 @NoArgsConstructor

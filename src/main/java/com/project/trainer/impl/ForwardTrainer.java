@@ -29,33 +29,52 @@ public class ForwardTrainer implements PositionTrainer {
 
         List<Player> forwards = playerRepository.findForwards(MIN_APPEARANCES);
 
-        if (forwards.isEmpty()){
-           log.warn("No forwards found for training");
+        if (forwards.isEmpty()) {
+            log.warn("No forwards found for training");
+            return;
         }
 
         double[][] forwardFeaturesMatrix = new double[forwards.size()][PARAMS_FOR_FEATURES];
         double[] targetWinRates = new double[forwards.size()];
 
         for (int i = 0; i < forwards.size(); i++) {
-            PlayerStats stats = forwards.get(i).getStats();
+            Player player = forwards.get(i);
+            PlayerStats stats = player.getStats();
+
             double matches = Math.max(stats.getAppearances(), 1);
 
-            targetWinRates[i] = (stats.getWins() != null ? stats.getWins() : ZERO_WINS) / matches;
+            double winsPerMatch = (stats.getWins() != null ? stats.getWins() : ZERO_WINS) / matches;
+            double goalsPerMatch = (stats.getGoals() != null ? stats.getGoals() : ZERO_GOALS) / matches;
+            double assistsPerMatch = (stats.getAssists() != null ? stats.getAssists() : ZERO_ASSISTS) / matches;
+            double shotsPerMatch = (stats.getShotsOnTarget() != null ? stats.getShotsOnTarget() : ZERO_SHOTS_ON_TARGET) / matches;
 
-            forwardFeaturesMatrix[i][0] = (stats.getGoals() != null ? stats.getGoals() : ZERO_GOALS) / matches;
-            forwardFeaturesMatrix[i][1] = (stats.getAssists() != null ? stats.getAssists() : ZERO_ASSISTS) / matches;
-            forwardFeaturesMatrix[i][2] = (stats.getShotsOnTarget() != null ? stats.getShotsOnTarget() : ZERO_SHOTS_ON_TARGET) / matches;
+            targetWinRates[i] = winsPerMatch;
+            forwardFeaturesMatrix[i][0] = goalsPerMatch;
+            forwardFeaturesMatrix[i][1] = assistsPerMatch;
+            forwardFeaturesMatrix[i][2] = shotsPerMatch;
+
+            if (i < 10) {
+                log.info("FORWARD DEBUG -> name: {}, wins: {}, appearances: {}, winsPerMatch: {}, goalsPerMatch: {}, assistsPerMatch: {}, shotsPerMatch: {}",
+                        player.getName(),
+                        stats.getWins(),
+                        stats.getAppearances(),
+                        winsPerMatch,
+                        goalsPerMatch,
+                        assistsPerMatch,
+                        shotsPerMatch);
+            }
         }
 
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
         regression.newSampleData(targetWinRates, forwardFeaturesMatrix);
+
         double[] beta = regression.estimateRegressionParameters();
 
         log.info("--- FORWARDS (FW) ---");
-        log.info("Basic chance for win (Constant): " + beta[0]);
-        log.info("Weight for  Goals (x1): " + beta[1]);
-        log.info("Weight for  Assists (x2): " + beta[2]);
-        log.info("Weight for  Shots (x3): " + beta[3]);
+        log.info("Basic chance for win (Constant): {}", beta[0]);
+        log.info("Weight for Goals (x1): {}", beta[1]);
+        log.info("Weight for Assists (x2): {}", beta[2]);
+        log.info("Weight for Shots (x3): {}", beta[3]);
         log.info("-----------------------");
     }
 }

@@ -34,40 +34,79 @@ public class ClusterService implements ClusterizationService {
         log.info("Starts K-Means algorithm...");
 
         List<Player> players = playerRepository.findAllPlayersWithStats();
+
         if (players.isEmpty()) {
             log.warn("No data for clustering.");
             return;
         }
 
-        double maxGoals = players.stream().mapToDouble(p -> p.getStats().getGoals()).max().orElse(DEFAULT_MAX_VALUE);
-        double maxAssists = players.stream().mapToDouble(p -> p.getStats().getAssists()).max().orElse(DEFAULT_MAX_VALUE);
-        double maxCleanSheets = players.stream().mapToDouble(p -> p.getStats().getCleanSheets()).max().orElse(DEFAULT_MAX_VALUE);
-        double maxApps = players.stream().mapToDouble(p -> p.getStats().getAppearances()).max().orElse(DEFAULT_MAX_VALUE);
+        double maxGoals = players.stream()
+                .mapToDouble(p -> p.getStats().getGoals())
+                .max()
+                .orElse(DEFAULT_MAX_VALUE);
 
+        double maxAssists = players.stream()
+                .mapToDouble(p -> p.getStats().getAssists())
+                .max()
+                .orElse(DEFAULT_MAX_VALUE);
 
-        List<PlayerWrapper> clusterInput = players.stream().map(p -> new PlayerWrapper(p, maxGoals, maxAssists, maxCleanSheets, maxApps)).collect(Collectors.toList());
+        double maxCleanSheets = players.stream()
+                .mapToDouble(p -> p.getStats().getCleanSheets())
+                .max()
+                .orElse(DEFAULT_MAX_VALUE);
 
+        double maxShots = players.stream()
+                .mapToDouble(p -> p.getStats().getShotsOnTarget())
+                .max()
+                .orElse(DEFAULT_MAX_VALUE);
 
-        KMeansPlusPlusClusterer<PlayerWrapper> clusterer = new KMeansPlusPlusClusterer<>(NUM_CLUSTERS, MAX_ITERATIONS);
-        List<CentroidCluster<PlayerWrapper>> clusters = clusterer.cluster(clusterInput);
+        List<PlayerWrapper> clusterInput = players.stream()
+                .map(p -> new PlayerWrapper(
+                        p,
+                        maxGoals,
+                        maxAssists,
+                        maxCleanSheets,
+                        maxShots
+                ))
+                .collect(Collectors.toList());
 
+        KMeansPlusPlusClusterer<PlayerWrapper> clusterer =
+                new KMeansPlusPlusClusterer<>(NUM_CLUSTERS, MAX_ITERATIONS);
+
+        List<CentroidCluster<PlayerWrapper>> clusters =
+                clusterer.cluster(clusterInput);
 
         for (int i = 0; i < clusters.size(); i++) {
+
             CentroidCluster<PlayerWrapper> cluster = clusters.get(i);
             double[] center = cluster.getCenter().getPoint();
 
-            log.info("Cluster №{}: Players = {} | Center: Goals={}, Аssists={}, Clean sheets={}, Games={}", i, cluster.getPoints().size(), String.format("%.2f", center[0]), String.format("%.2f", center[1]), String.format("%.2f", center[2]), String.format("%.2f", center[3]));
+            log.info("""
+                Cluster {}:
+                Players = {}
+                Center Goals = {}
+                Center Assists = {}
+                Center CleanSheets = {}
+                Center Shots = {}
+                Center IsGK = {}
+                """,
+                    i,
+                    cluster.getPoints().size(),
+                    String.format("%.4f", center[0]),
+                    String.format("%.4f", center[1]),
+                    String.format("%.4f", center[2]),
+                    String.format("%.4f", center[3]),
+                    String.format("%.4f", center[4]));
 
             for (PlayerWrapper wrapper : cluster.getPoints()) {
                 wrapper.getPlayer().getStats().setClusterId(i);
             }
         }
 
-
         playerRepository.saveAll(players);
-        log.info("====== PLAYERS ANALYZZING SUCCESFULLY  FINISHED======");
-    }
 
+        log.info("====== PLAYERS ANALYZING SUCCESSFULLY FINISHED ======");
+    }
 
     private static class PlayerWrapper implements Clusterable {
         private static final int EQUALS_TO_ZERO = 0;
@@ -75,18 +114,18 @@ public class ClusterService implements ClusterizationService {
         @Getter
         private final Player player;
 
-        public PlayerWrapper(Player player, double maxG, double maxA, double maxCS, double maxApp) {
+        public PlayerWrapper(Player player, double maxG, double maxA, double maxCS, double maxShots) {
             this.player = player;
             PlayerStats s = player.getStats();
 
             double normGoals = s.getGoals() / (maxG == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxG);
             double normAssists = s.getAssists() / (maxA == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxA);
             double normCleanSheets = s.getCleanSheets() / (maxCS == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxCS);
-            double normApps = s.getAppearances() / (maxApp == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxApp);
+            double normShots = s.getShotsOnTarget() / (maxShots == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxShots);
 
             double isGk = (player.getPosition() != null && player.getPosition().toUpperCase().contains("GK")) ? 1.0 : 0.0;
 
-            this.points = new double[]{normGoals, normAssists, normCleanSheets, normApps, isGk};
+            this.points = new double[]{normGoals, normAssists, normCleanSheets, normShots, isGk};
         }
 
         @Override

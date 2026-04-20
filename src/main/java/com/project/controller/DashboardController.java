@@ -1,6 +1,6 @@
 package com.project.controller;
 
-import com.project.dto.ClusterCountDto;
+
 import com.project.dto.DashboardDto;
 import com.project.service.DashboardService;
 import lombok.RequiredArgsConstructor;
