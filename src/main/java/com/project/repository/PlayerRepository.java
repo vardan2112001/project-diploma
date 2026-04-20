@@ -35,4 +35,19 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT p FROM Player p JOIN p.stats s WHERE s.appearances > :minAppearances AND p.position = 'Goalkeeper'")
     List<Player> findGoalkeepers(@Param("minAppearances") Integer  minAppearances);
 
+    @Query("""
+       SELECT ps.clusterId, COUNT(ps)
+       FROM PlayerStats ps
+       WHERE ps.clusterId IS NOT NULL
+       GROUP BY ps.clusterId
+       ORDER BY ps.clusterId
+       """)
+    List<Object[]> getClusterCounts();
+
+    @Query("SELECT AVG(ps.performanceScore) FROM PlayerStats ps")
+    Double getAveragePerformanceScore();
+
+    @Query("SELECT MAX(ps.performanceScore) FROM PlayerStats ps")
+    Double getTopPerformanceScore();
+
 }

@@ -8,9 +8,9 @@ import lombok.*;
 @Table(name = "players")
 @Getter
 @Setter
-@RequiredArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Player {
 
     @Id

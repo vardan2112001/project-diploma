@@ -5,7 +5,7 @@ import com.project.strategy.PositionScoringStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MidfielderScoringStrategy implements PositionScoringStrategy {
+public class  MidfielderScoringStrategy implements PositionScoringStrategy {
 
     private static final double CONSTANT = 0.33919;
     private static final double WEIGHT_GOALS = 0.53169;
