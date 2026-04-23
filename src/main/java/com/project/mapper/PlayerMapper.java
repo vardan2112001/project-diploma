@@ -10,7 +10,8 @@ public class PlayerMapper {
     private static final Integer ZERO_STAT = 0;
 
     public static PlayerResponseDto toDto(Player player) {
-        return PlayerResponseDto.builder()
+        return PlayerResponseDto.builder().
+                id(player.getId())
                 .name(player.getName())
                 .club(player.getTeam() != null ? player.getTeam().getName() : "No club")
                 .position(player.getPosition())
