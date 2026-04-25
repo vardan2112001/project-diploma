@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PlayerServiceImpl implements PlayerService {
@@ -18,9 +20,11 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerRepository playerRepository;
 
     @Override
-    public Page<PlayerResponseDto> getTopPlayers(Pageable pageable) {
+    public List<PlayerResponseDto> getTopPlayers(Pageable pageable) {
         return playerRepository.findTopPlayers(pageable)
-                .map(PlayerMapper::toDto);
+                .stream()
+                .map(PlayerMapper::toDto)
+                .toList();
     }
 
     @Override

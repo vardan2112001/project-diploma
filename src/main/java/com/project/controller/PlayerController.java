@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/players")
 @RequiredArgsConstructor
@@ -17,10 +19,9 @@ public class PlayerController {
     private final PlayerService playerService;
 
     @GetMapping("/top")
-    public Page<PlayerResponseDto> getTopPlayers(
-            @PageableDefault(size = 5) Pageable pageable
-    ) {
+    public List<PlayerResponseDto> getTopPlayers(@PageableDefault Pageable pageable) {
         return playerService.getTopPlayers(pageable);
+
     }
 
     @GetMapping("/{id}")

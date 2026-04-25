@@ -1,5 +1,6 @@
 package com.project.repository;
 
+import com.project.dto.PlayerResponseDto;
 import com.project.entity.Player;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
            WHERE p.stats.appearances > 10
            ORDER BY p.stats.performanceScore DESC
            """)
-    Page<Player> findTopPlayers(Pageable pageable);
+    List<Player> findTopPlayers(Pageable pageable);
 
     Page<Player> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
