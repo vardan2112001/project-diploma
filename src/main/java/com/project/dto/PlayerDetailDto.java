@@ -9,12 +9,11 @@ public record PlayerDetailDto(
         String club,
         String position,
         Double performanceScore,
-
         Integer appearances,
         Integer goals,
         Integer assists,
         Integer shotsOnTarget,
         Integer cleanSheets,
         Integer saves,
-        Integer clusterId
-) {}
+        Integer clusterId) {
+}

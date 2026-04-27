@@ -5,35 +5,35 @@ import com.project.strategy.PositionScoringStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
-public class  MidfielderScoringStrategy implements PositionScoringStrategy {
+public class MidfielderScoringStrategy implements PositionScoringStrategy {
 
     private static final double CONSTANT = 0.33919261960863534;
     private static final double WEIGHT_GOALS = 0.5316948393717102;
-    private static final double WEIGHT_ASSISTS =0.1044034432598294;
+    private static final double WEIGHT_ASSISTS = 0.1044034432598294;
     private static final double ZERO_SCORE = 0.0;
-    private static final int ZERO_GOALS = 0;
-    private static final int ZERO_ASSISTS = 0;
-    private static final int ZERO_MATCHES = 0;
-    private static final int MUL_BY_TEN = 10;
+    private static final int ZERO_APPEARANCES = 0;
+    private static final int ZERO_VALUE = 0;
+    private static final int SCORE_SCALE = 10;
 
     @Override
     public boolean supports(String position) {
         String pos = position.toUpperCase();
-        return pos.contains("MF") || pos.contains("MIDFIELDER") || pos.contains("AM") || pos.contains("CM") || pos.contains("DM");
+        return pos.contains("MF") || pos.contains("MIDFIELDER")
+                || pos.contains("AM") || pos.contains("CM") || pos.contains("DM");
     }
 
     @Override
     public double calculateScore(PlayerStats stats) {
-        if (stats.getAppearances() == null || stats.getAppearances() == ZERO_MATCHES) {
+        if (stats.getAppearances() == null || stats.getAppearances() == ZERO_APPEARANCES) {
             return ZERO_SCORE;
         }
 
         double matches = stats.getAppearances();
-        double goals = (stats.getGoals() != null ? stats.getGoals() : ZERO_GOALS) / matches;
-        double assists = (stats.getAssists() != null ? stats.getAssists() : ZERO_ASSISTS) / matches;
+        double goals = (stats.getGoals() != null ? stats.getGoals() : ZERO_VALUE) / matches;
+        double assists = (stats.getAssists() != null ? stats.getAssists() : ZERO_VALUE) / matches;
 
         double winProbability = CONSTANT + (goals * WEIGHT_GOALS) + (assists * WEIGHT_ASSISTS);
 
-        return Math.max(winProbability * MUL_BY_TEN, ZERO_SCORE);
+        return Math.max(winProbability * SCORE_SCALE, ZERO_SCORE);
     }
 }

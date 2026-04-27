@@ -1,16 +1,19 @@
 package com.project.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Builder
 @Entity
 @Table(name = "players")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Player {
 
     @Id
@@ -18,7 +21,6 @@ public class Player {
     private Long id;
 
     private String name;
-
     private Integer jerseyNumber;
     private Integer age;
     private String position;
@@ -27,9 +29,8 @@ public class Player {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "team_id")
     private Team team;
+
     @OneToOne(mappedBy = "player", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    PlayerStats stats;
-
-
+    private PlayerStats stats;
 }

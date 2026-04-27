@@ -42,28 +42,30 @@ public class DatabaseSeederService implements DataSeeder {
         Map<String, Team> teamCache = new HashMap<>();
 
         for (CsvPlayerDto dto : parsedPlayers) {
-            Team team = teamCache.computeIfAbsent(dto.teamName(), name -> teamRepository.findByName(name).orElseGet(() -> {
-                Team newTeam = new Team();
-                newTeam.setName(name);
-                return teamRepository.save(newTeam);
-            }));
-
+            Team team = resolveTeam(dto.teamName(), teamCache);
 
             Player player = CsvMapper.toPlayerEntity(dto, team);
             PlayerStats stats = CsvMapper.toPlayerStatsEntity(dto, player);
 
             player.setStats(stats);
-
             stats.setPerformanceScore(playerAnalysisService.calculatePerformanceScore(player));
-
 
             playerRepository.save(player);
         }
-        log.info("Players loaded in DB successfully ");
+        log.info("Players loaded in DB successfully");
 
         clusterService.performClustering();
         regressionService.trainModels();
 
-        log.info("====== DB  INITIALIZED SUCCESSFULLY ======");
+        log.info("====== DB INITIALIZED SUCCESSFULLY ======");
+    }
+
+    private Team resolveTeam(String teamName, Map<String, Team> teamCache) {
+        return teamCache.computeIfAbsent(teamName, name ->
+                teamRepository.findByName(name).orElseGet(() -> {
+                    Team newTeam = new Team();
+                    newTeam.setName(name);
+                    return teamRepository.save(newTeam);
+                }));
     }
 }

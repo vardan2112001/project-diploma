@@ -14,13 +14,14 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class CsvReaderService  implements PlayerReaderService {
+public class CsvReaderService implements PlayerReaderService {
 
     private static final int MIN_COLUMNS_REQUIRED = 48;
 
     @Value("${app.import.file.path}")
     private String filePath;
-     @Override
+
+    @Override
     public List<CsvPlayerDto> readPlayers() {
         List<CsvPlayerDto> parsedPlayers = new ArrayList<>();
         String line;
@@ -30,15 +31,15 @@ public class CsvReaderService  implements PlayerReaderService {
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
 
-                String[] data = line.split(",",-1);
+                String[] data = line.split(",", -1);
                 if (data.length < MIN_COLUMNS_REQUIRED) continue;
 
                 parsedPlayers.add(CsvMapper.toDto(data));
             }
-            log.info("File readed correctly {}", parsedPlayers.size());
+            log.info("File read successfully, {} players parsed", parsedPlayers.size());
 
         } catch (Exception e) {
-            log.error("Eroor with readind  CSV : ", e);
+            log.error("Error while reading CSV: ", e);
         }
 
         return parsedPlayers;

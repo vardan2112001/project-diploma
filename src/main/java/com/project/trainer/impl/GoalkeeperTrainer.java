@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.springframework.stereotype.Component;
 
-
 import java.util.List;
 
 @Slf4j
@@ -17,14 +16,13 @@ import java.util.List;
 @Component
 public class GoalkeeperTrainer implements PositionTrainer {
 
-    private final PlayerRepository playerRepository;
-
     private static final Integer MIN_APPEARANCES = 5;
     private static final int PARAMS_FOR_FEATURES = 2;
     private static final int ZERO_WINS = 0;
     private static final int ZERO_SAVES = 0;
     private static final int ZERO_CLEAN_SHEETS = 0;
 
+    private final PlayerRepository playerRepository;
 
     @Override
     public void train() {
@@ -32,6 +30,7 @@ public class GoalkeeperTrainer implements PositionTrainer {
 
         if (goalkeepers.isEmpty()) {
             log.warn("No goalkeepers found for training");
+            return;
         }
 
         double[][] goalkeeperFeaturesMatrix = new double[goalkeepers.size()][PARAMS_FOR_FEATURES];
@@ -52,9 +51,9 @@ public class GoalkeeperTrainer implements PositionTrainer {
         double[] beta = regression.estimateRegressionParameters();
 
         log.info("--- GOALKEEPERS ---");
-        log.info("Chance for winf  (Constant): " + beta[0]);
-        log.info("Weight  for  Saves (x1): " + beta[1]);
-        log.info("Weight  for Clean-Sheets (x2): " + beta[2]);
+        log.info("Chance for Win (Constant): {}", beta[0]);
+        log.info("Weight for Saves (x1): {}", beta[1]);
+        log.info("Weight for Clean-Sheets (x2): {}", beta[2]);
         log.info("--------------------");
     }
 }

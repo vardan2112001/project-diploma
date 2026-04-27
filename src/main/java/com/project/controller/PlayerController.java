@@ -7,7 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -16,12 +20,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlayerController {
 
+    private static final int DEFAULT_PAGE_SIZE = 5;
+
     private final PlayerService playerService;
 
     @GetMapping("/top")
     public List<PlayerResponseDto> getTopPlayers(@PageableDefault Pageable pageable) {
         return playerService.getTopPlayers(pageable);
-
     }
 
     @GetMapping("/{id}")
@@ -30,18 +35,14 @@ public class PlayerController {
     }
 
     @GetMapping("/search")
-    public Page<PlayerDetailDto> searchPlayers(
-            @RequestParam String name,
-            @PageableDefault(size = 5) Pageable pageable
-    ) {
+    public Page<PlayerDetailDto> searchPlayers(@RequestParam String name,
+                                               @PageableDefault(size = DEFAULT_PAGE_SIZE) Pageable pageable) {
         return playerService.searchPlayersByName(name, pageable);
     }
 
     @GetMapping("/role/{clusterId}")
-    public Page<PlayerResponseDto> getPlayersByRole(
-            @PathVariable Integer clusterId,
-            @PageableDefault(size = 5) Pageable pageable
-    ) {
+    public Page<PlayerResponseDto> getPlayersByRole(@PathVariable Integer clusterId,
+                                                    @PageableDefault(size = DEFAULT_PAGE_SIZE) Pageable pageable) {
         return playerService.getPlayersByClusterRole(clusterId, pageable);
     }
 }

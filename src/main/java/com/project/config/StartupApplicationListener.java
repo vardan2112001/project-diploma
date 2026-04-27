@@ -1,6 +1,5 @@
 package com.project.config;
 
-
 import com.project.service.DataSeeder;
 import com.project.service.PlayerReaderService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ public class StartupApplicationListener {
 
     private final PlayerReaderService playerReaderService;
     private final DataSeeder databaseSeederService;
-
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationEvent() {

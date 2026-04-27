@@ -4,6 +4,6 @@ import com.project.dto.CsvPlayerDto;
 
 import java.util.List;
 
-public interface  DataSeeder {
+public interface DataSeeder {
     void seedDatabase(List<CsvPlayerDto> parsedPlayers);
 }

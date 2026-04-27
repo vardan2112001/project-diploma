@@ -1,6 +1,5 @@
 package com.project.repository;
 
-import com.project.dto.PlayerResponseDto;
 import com.project.entity.Player;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

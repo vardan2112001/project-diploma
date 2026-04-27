@@ -23,6 +23,7 @@ public class CsvMapper {
     private static final int IDX_ASSISTS = 39;
     private static final int IDX_SAVES = 47;
 
+    private static final int FALLBACK_VALUE = 0;
 
     public static CsvPlayerDto toDto(String[] data) {
         return CsvPlayerDto.builder()
@@ -43,13 +44,14 @@ public class CsvMapper {
     }
 
     public static Player toPlayerEntity(CsvPlayerDto dto, Team team) {
-        return Player.builder().
-                name(dto.name()).
-                jerseyNumber(dto.jerseyNumber()).
-                position(dto.position()).
-                nationality(dto.nationality()).
-                age(dto.age()).
-                team(team).build();
+        return Player.builder()
+                .name(dto.name())
+                .jerseyNumber(dto.jerseyNumber())
+                .position(dto.position())
+                .nationality(dto.nationality())
+                .age(dto.age())
+                .team(team)
+                .build();
     }
 
     public static PlayerStats toPlayerStatsEntity(CsvPlayerDto dto, Player player) {
@@ -66,12 +68,14 @@ public class CsvMapper {
     }
 
     private static Integer parseIntSafe(String value) {
-        if (value == null || value.isBlank()) return 0;
+        if (value == null || value.isBlank()) {
+            return FALLBACK_VALUE;
+        }
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {
-            log.warn("Parsing problem  '{}'. Value is 0.", value);
-            return 0;
+            log.warn("Parsing problem '{}'. Defaulting to 0.", value);
+            return FALLBACK_VALUE;
         }
     }
 }

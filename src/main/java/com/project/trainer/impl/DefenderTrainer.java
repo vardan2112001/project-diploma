@@ -11,24 +11,26 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 @Component
-public class DefenderTrainer  implements PositionTrainer {
-    private final PlayerRepository playerRepository;
+public class DefenderTrainer implements PositionTrainer {
 
-    private static final Integer  MIN_APPEARANCES = 5;
+    private static final Integer MIN_APPEARANCES = 5;
     private static final int PARAMS_FOR_FEATURES = 2;
     private static final int ZERO_WINS = 0;
     private static final int ZERO_CLEAN_SHEETS = 0;
     private static final int ZERO_ASSISTS = 0;
 
+    private final PlayerRepository playerRepository;
+
     @Override
     public void train() {
         List<Player> defenders = playerRepository.findDefenders(MIN_APPEARANCES);
 
-        if (defenders.isEmpty()){
-             log.warn("No defenders found for training");
+        if (defenders.isEmpty()) {
+            log.warn("No defenders found for training");
+            return;
         }
 
         double[][] defenderFeaturesMatrix = new double[defenders.size()][PARAMS_FOR_FEATURES];
@@ -49,9 +51,9 @@ public class DefenderTrainer  implements PositionTrainer {
         double[] beta = regression.estimateRegressionParameters();
 
         log.info("--- DEFENDERS (DF) ---");
-        log.info("Minimum chance  for Win (Constant): " + beta[0]);
-        log.info("Weight for  Clean-Sheets (x1): " + beta[1]);
-        log.info("Weight for  Assists  (x2): " + beta[2]);
+        log.info("Minimum chance for Win (Constant): {}", beta[0]);
+        log.info("Weight for Clean-Sheets (x1): {}", beta[1]);
+        log.info("Weight for Assists (x2): {}", beta[2]);
         log.info("-----------------------");
     }
 }

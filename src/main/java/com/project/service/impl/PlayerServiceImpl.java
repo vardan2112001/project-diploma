@@ -17,6 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlayerServiceImpl implements PlayerService {
 
+    private static final String PLAYER_NOT_FOUND = "Player by this ID does not exist";
+
     private final PlayerRepository playerRepository;
 
     @Override
@@ -31,7 +33,7 @@ public class PlayerServiceImpl implements PlayerService {
     public PlayerDetailDto getPlayerById(Long id) {
         return playerRepository.findById(id)
                 .map(PlayerMapper::toDetailDto)
-                .orElseThrow(() -> new PlayerNotFoundException("Player by this ID does not exist"));
+                .orElseThrow(() -> new PlayerNotFoundException(PLAYER_NOT_FOUND));
     }
 
     @Override

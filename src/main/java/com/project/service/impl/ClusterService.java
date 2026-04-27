@@ -13,13 +13,12 @@ import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-
 public class ClusterService implements ClusterizationService {
 
     private static final int NUM_CLUSTERS = 4;
@@ -40,56 +39,31 @@ public class ClusterService implements ClusterizationService {
             return;
         }
 
-        double maxGoals = players.stream()
-                .mapToDouble(p -> p.getStats().getGoals())
-                .max()
-                .orElse(DEFAULT_MAX_VALUE);
+        StatMaxima maxima = computeMaxima(players);
 
-        double maxAssists = players.stream()
-                .mapToDouble(p -> p.getStats().getAssists())
-                .max()
-                .orElse(DEFAULT_MAX_VALUE);
-
-        double maxCleanSheets = players.stream()
-                .mapToDouble(p -> p.getStats().getCleanSheets())
-                .max()
-                .orElse(DEFAULT_MAX_VALUE);
-
-        double maxShots = players.stream()
-                .mapToDouble(p -> p.getStats().getShotsOnTarget())
-                .max()
-                .orElse(DEFAULT_MAX_VALUE);
-
-        List<PlayerWrapper> clusterInput = players.stream()
-                .map(p -> new PlayerWrapper(
-                        p,
-                        maxGoals,
-                        maxAssists,
-                        maxCleanSheets,
-                        maxShots
-                ))
-                .collect(Collectors.toList());
+        List<PlayerWrapper> clusterInput = new ArrayList<>(players.size());
+        for (Player p : players) {
+            clusterInput.add(new PlayerWrapper(p, maxima));
+        }
 
         KMeansPlusPlusClusterer<PlayerWrapper> clusterer =
                 new KMeansPlusPlusClusterer<>(NUM_CLUSTERS, MAX_ITERATIONS);
 
-        List<CentroidCluster<PlayerWrapper>> clusters =
-                clusterer.cluster(clusterInput);
+        List<CentroidCluster<PlayerWrapper>> clusters = clusterer.cluster(clusterInput);
 
         for (int i = 0; i < clusters.size(); i++) {
-
             CentroidCluster<PlayerWrapper> cluster = clusters.get(i);
             double[] center = cluster.getCenter().getPoint();
 
             log.info("""
-                Cluster {}:
-                Players = {}
-                Center Goals = {}
-                Center Assists = {}
-                Center CleanSheets = {}
-                Center Shots = {}
-                Center IsGK = {}
-                """,
+                    Cluster {}:
+                    Players = {}
+                    Center Goals = {}
+                    Center Assists = {}
+                    Center CleanSheets = {}
+                    Center Shots = {}
+                    Center IsGK = {}
+                    """,
                     i,
                     cluster.getPoints().size(),
                     String.format("%.4f", center[0]),
@@ -108,20 +82,48 @@ public class ClusterService implements ClusterizationService {
         log.info("====== PLAYERS ANALYZING SUCCESSFULLY FINISHED ======");
     }
 
+    private static StatMaxima computeMaxima(List<Player> players) {
+        double maxGoals = 0;
+        double maxAssists = 0;
+        double maxCleanSheets = 0;
+        double maxShots = 0;
+
+        for (Player p : players) {
+            PlayerStats s = p.getStats();
+            maxGoals = Math.max(maxGoals, s.getGoals());
+            maxAssists = Math.max(maxAssists, s.getAssists());
+            maxCleanSheets = Math.max(maxCleanSheets, s.getCleanSheets());
+            maxShots = Math.max(maxShots, s.getShotsOnTarget());
+        }
+
+        return new StatMaxima(
+                safeMax(maxGoals),
+                safeMax(maxAssists),
+                safeMax(maxCleanSheets),
+                safeMax(maxShots));
+    }
+
+    private static double safeMax(double value) {
+        return value == 0 ? DEFAULT_MAX_VALUE : value;
+    }
+
+    private record StatMaxima(double goals, double assists, double cleanSheets, double shots) {
+    }
+
     private static class PlayerWrapper implements Clusterable {
-        private static final int EQUALS_TO_ZERO = 0;
+
         private final double[] points;
         @Getter
         private final Player player;
 
-        public PlayerWrapper(Player player, double maxG, double maxA, double maxCS, double maxShots) {
+        PlayerWrapper(Player player, StatMaxima maxima) {
             this.player = player;
             PlayerStats s = player.getStats();
 
-            double normGoals = s.getGoals() / (maxG == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxG);
-            double normAssists = s.getAssists() / (maxA == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxA);
-            double normCleanSheets = s.getCleanSheets() / (maxCS == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxCS);
-            double normShots = s.getShotsOnTarget() / (maxShots == EQUALS_TO_ZERO ? DEFAULT_MAX_VALUE : maxShots);
+            double normGoals = s.getGoals() / maxima.goals();
+            double normAssists = s.getAssists() / maxima.assists();
+            double normCleanSheets = s.getCleanSheets() / maxima.cleanSheets();
+            double normShots = s.getShotsOnTarget() / maxima.shots();
 
             double isGk = (player.getPosition() != null && player.getPosition().toUpperCase().contains("GK")) ? 1.0 : 0.0;
 
@@ -132,6 +134,5 @@ public class ClusterService implements ClusterizationService {
         public double[] getPoint() {
             return points;
         }
-
     }
 }

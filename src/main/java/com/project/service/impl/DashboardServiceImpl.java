@@ -8,36 +8,36 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
-
 @Service
 @RequiredArgsConstructor
-public class DashboardServiceImpl  implements DashboardService {
+public class DashboardServiceImpl implements DashboardService {
 
-    private static final double ZERO_SCORE  = 0.0;
-    private static final double MUL_BY_ONE_HUNDRED = 100.0;
-    private static final double DIV_BY_ONE_HUNDRED = 100.0;
+    private static final double ZERO_SCORE = 0.0;
+    private static final double ROUNDING_FACTOR = 100.0;
+
     private final PlayerRepository playerRepository;
 
     @Override
     public DashboardDto getDashboard() {
-        long totalPlayers =playerRepository.count();
+        long totalPlayers = playerRepository.count();
         Double avgPerformanceScore = playerRepository.getAveragePerformanceScore();
         Double topPerformanceScore = playerRepository.getTopPerformanceScore();
 
         return new DashboardDto(
                 totalPlayers,
-                avgPerformanceScore  != null ? round(avgPerformanceScore) :ZERO_SCORE,
-                topPerformanceScore != null ? round(topPerformanceScore) : ZERO_SCORE
-        );
+                round(avgPerformanceScore),
+                round(topPerformanceScore));
     }
 
     @Override
     public List<Object[]> getClusterCounts() {
         return playerRepository.getClusterCounts();
     }
-    private double round(Double value) {
-        return Math.round(value * MUL_BY_ONE_HUNDRED) / DIV_BY_ONE_HUNDRED;
-    }
 
+    private double round(Double value) {
+        if (value == null) {
+            return ZERO_SCORE;
+        }
+        return Math.round(value * ROUNDING_FACTOR) / ROUNDING_FACTOR;
+    }
 }
