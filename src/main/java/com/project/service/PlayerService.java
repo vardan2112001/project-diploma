@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface PlayerService {
 
-    List<PlayerResponseDto> getTopPlayers(Pageable pageable);
+    Page<PlayerResponseDto> getTopPlayers(Pageable pageable);
 
     PlayerDetailDto getPlayerById(Long id);
 

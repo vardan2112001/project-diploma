@@ -22,12 +22,11 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerRepository playerRepository;
 
     @Override
-    public List<PlayerResponseDto> getTopPlayers(Pageable pageable) {
+    public Page<PlayerResponseDto> getTopPlayers(Pageable pageable) {
         return playerRepository.findTopPlayers(pageable)
-                .stream()
-                .map(PlayerMapper::toDto)
-                .toList();
+                .map(PlayerMapper::toDto);
     }
+
 
     @Override
     public PlayerDetailDto getPlayerById(Long id) {

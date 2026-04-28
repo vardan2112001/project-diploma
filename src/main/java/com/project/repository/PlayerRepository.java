@@ -17,7 +17,7 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
            WHERE p.stats.appearances > 10
            ORDER BY p.stats.performanceScore DESC
            """)
-    List<Player> findTopPlayers(Pageable pageable);
+    Page<Player> findTopPlayers(Pageable pageable);
 
     Page<Player> findByNameContainingIgnoreCase(String name, Pageable pageable);
 

@@ -25,7 +25,7 @@ public class PlayerController {
     private final PlayerService playerService;
 
     @GetMapping("/top")
-    public List<PlayerResponseDto> getTopPlayers(@PageableDefault Pageable pageable) {
+    public Page<PlayerResponseDto> getTopPlayers(@PageableDefault(size = 5) Pageable pageable) {
         return playerService.getTopPlayers(pageable);
     }
 
