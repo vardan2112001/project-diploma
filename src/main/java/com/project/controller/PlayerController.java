@@ -2,6 +2,7 @@ package com.project.controller;
 
 import com.project.dto.PlayerDetailDto;
 import com.project.dto.PlayerResponseDto;
+import com.project.enums.Position;
 import com.project.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,5 +45,13 @@ public class PlayerController {
     public Page<PlayerResponseDto> getPlayersByRole(@PathVariable Integer clusterId,
                                                     @PageableDefault(size = DEFAULT_PAGE_SIZE) Pageable pageable) {
         return playerService.getPlayersByClusterRole(clusterId, pageable);
+    }
+    @GetMapping("/position")
+    public Page<PlayerResponseDto> getTopPlayersByPosition(
+            @RequestParam(required = false) Position position,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return playerService.getTopPlayersByPosition(position, page, size);
     }
 }
