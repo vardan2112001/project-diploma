@@ -2,12 +2,14 @@ package com.project.service.impl;
 
 import com.project.dto.PlayerDetailDto;
 import com.project.dto.PlayerResponseDto;
+import com.project.enums.Position;
 import com.project.exceptions.PlayerNotFoundException;
 import com.project.mapper.PlayerMapper;
 import com.project.repository.PlayerRepository;
 import com.project.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,16 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Page<PlayerResponseDto> getPlayersByClusterRole(Integer clusterId, Pageable pageable) {
         return playerRepository.findByStatsClusterId(clusterId, pageable)
+                .map(PlayerMapper::toDto);
+    }
+
+    @Override
+    public Page<PlayerResponseDto> getTopPlayersByPosition(Position position, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        String dbPosition = (position != null) ? position.getValue() : null;
+
+        return playerRepository.findByPositionOptional(dbPosition, pageable)
                 .map(PlayerMapper::toDto);
     }
 }

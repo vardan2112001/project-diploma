@@ -89,4 +89,7 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
     @Query("SELECT MAX(ps.performanceScore) FROM PlayerStats ps")
     Double getTopPerformanceScore();
+
+    @Query("SELECT p FROM Player p WHERE :position IS NULL OR p.position = :position")
+    Page<Player> findByPositionOptional(@Param("position") String position, Pageable pageable);
 }
