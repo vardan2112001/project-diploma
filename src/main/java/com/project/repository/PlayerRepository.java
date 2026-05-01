@@ -36,6 +36,8 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
            FROM Player p
            JOIN p.stats s
            WHERE s.clusterId = :clusterId
+           AND s.appearances > 10
+            ORDER BY s.performanceScore DESC
            """)
     Page<Player> findByStatsClusterId(@Param("clusterId") Integer clusterId, Pageable pageable);
 
@@ -90,6 +92,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT MAX(ps.performanceScore) FROM PlayerStats ps")
     Double getTopPerformanceScore();
 
-    @Query("SELECT p FROM Player p WHERE :position IS NULL OR p.position = :position")
+    @Query("SELECT p FROM Player p WHERE (:position IS NULL OR p.position = :position) AND p.stats.appearances > 10  ORDER  BY p.stats.performanceScore DESC ")
     Page<Player> findByPositionOptional(@Param("position") String position, Pageable pageable);
 }
