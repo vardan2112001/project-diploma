@@ -33,6 +33,7 @@ public class PlayerMapper {
                 .name(player.getName())
                 .club(clubName(player))
                 .position(player.getPosition())
+                .age(player.getAge())
                 .performanceScore(getScore(player))
                 .appearances(safeStat(stats, PlayerStats::getAppearances))
                 .goals(safeStat(stats, PlayerStats::getGoals))

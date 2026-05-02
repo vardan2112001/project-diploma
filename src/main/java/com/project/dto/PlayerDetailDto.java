@@ -9,6 +9,7 @@ public record PlayerDetailDto(
         String club,
         String position,
         Double performanceScore,
+        Integer age,
         Integer appearances,
         Integer goals,
         Integer assists,
