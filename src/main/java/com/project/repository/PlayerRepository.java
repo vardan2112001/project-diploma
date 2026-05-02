@@ -1,0 +1,97 @@
+package com.project.repository;
+
+import com.project.entity.Player;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface PlayerRepository extends JpaRepository<Player, Long> {
+
+    @Query("""
+           SELECT p
+           FROM Player p
+           WHERE p.stats.appearances > 10
+           ORDER BY p.stats.performanceScore DESC
+           """)
+    Page<Player> findTopPlayers(Pageable pageable);
+
+    Page<Player> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    boolean existsByIdIsNotNull();
+
+    @Query("""
+           SELECT p
+           FROM Player p
+           JOIN FETCH p.stats
+           WHERE p.stats IS NOT NULL
+           """)
+    List<Player> findAllPlayersWithStats();
+
+    @Query("""
+           SELECT p
+           FROM Player p
+           JOIN p.stats s
+           WHERE s.clusterId = :clusterId
+           AND s.appearances > 10
+            ORDER BY s.performanceScore DESC
+           """)
+    Page<Player> findByStatsClusterId(@Param("clusterId") Integer clusterId, Pageable pageable);
+
+    @Query("""
+           SELECT p
+           FROM Player p
+           JOIN p.stats s
+           WHERE s.appearances > :minAppearances
+             AND p.position = 'Forward'
+           """)
+    List<Player> findForwards(@Param("minAppearances") Integer minAppearances);
+
+    @Query("""
+           SELECT p
+           FROM Player p
+           JOIN p.stats s
+           WHERE s.appearances > :minAppearances
+             AND p.position = 'Defender'
+           """)
+    List<Player> findDefenders(@Param("minAppearances") Integer minAppearances);
+
+    @Query("""
+           SELECT p
+           FROM Player p
+           JOIN p.stats s
+           WHERE s.appearances > :minAppearances
+             AND p.position = 'Midfielder'
+           """)
+    List<Player> findMidfielders(@Param("minAppearances") Integer minAppearances);
+
+    @Query("""
+           SELECT p
+           FROM Player p
+           JOIN p.stats s
+           WHERE s.appearances > :minAppearances
+             AND p.position = 'Goalkeeper'
+           """)
+    List<Player> findGoalkeepers(@Param("minAppearances") Integer minAppearances);
+
+    @Query("""
+           SELECT ps.clusterId, COUNT(ps)
+           FROM PlayerStats ps
+           WHERE ps.clusterId IS NOT NULL
+           GROUP BY ps.clusterId
+           ORDER BY ps.clusterId
+           """)
+    List<Object[]> getClusterCounts();
+
+    @Query("SELECT AVG(ps.performanceScore) FROM PlayerStats ps")
+    Double getAveragePerformanceScore();
+
+    @Query("SELECT MAX(ps.performanceScore) FROM PlayerStats ps")
+    Double getTopPerformanceScore();
+
+    @Query("SELECT p FROM Player p WHERE (:position IS NULL OR p.position = :position) AND p.stats.appearances > 10  ORDER  BY p.stats.performanceScore DESC ")
+    Page<Player> findByPositionOptional(@Param("position") String position, Pageable pageable);
+}
