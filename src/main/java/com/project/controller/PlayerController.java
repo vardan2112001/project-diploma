@@ -6,11 +6,12 @@ import com.project.enums.Position;
 import com.project.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/players")
@@ -51,4 +52,12 @@ public class PlayerController {
     ) {
         return playerService.getTopPlayersByPosition(position, page, size);
     }
+    @GetMapping
+    public ResponseEntity<Page<PlayerResponseDto>> getAllPlayers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(playerService.getAllPlayers(pageable));
+    }
+
 }

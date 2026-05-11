@@ -20,4 +20,5 @@ public interface PlayerService {
     Page<PlayerResponseDto> getPlayersByClusterRole(Integer clusterId, Pageable pageable);
 
      Page<PlayerResponseDto> getTopPlayersByPosition(Position position,int page,int size);
+     Page<PlayerResponseDto> getAllPlayers(Pageable pageable);
 }

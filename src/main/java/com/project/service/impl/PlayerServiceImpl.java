@@ -58,4 +58,10 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findByPositionOptional(dbPosition, pageable)
                 .map(PlayerMapper::toDto);
     }
+
+    @Override
+    public Page<PlayerResponseDto> getAllPlayers(Pageable pageable) {
+        return playerRepository.findAll(pageable).map(PlayerMapper::toDto);
+    }
+
 }
