@@ -1,0 +1,103 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: vardan
+      changes:
+        - createTable:
+            tableName: teams
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+
+        - createTable:
+            tableName: players
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: jersey_number
+                  type: int
+              - column:
+                  name: position
+                  type: varchar(255)
+              - column:
+                  name: nationality
+                  type: varchar(255)
+              - column:
+                  name: age
+                  type: int
+              - column:
+                  name: team_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_player_team
+                    references: teams(id)
+
+        - createTable:
+            tableName: player_stats
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: appearances
+                  type: int
+              - column:
+                  name: goals
+                  type: int
+              - column:
+                  name: assists
+                  type: int
+              - column:
+                  name: shots_on_target
+                  type: int
+              - column:
+                  name: clean_sheets
+                  type: int
+              - column:
+                  name: saves
+                  type: int
+              - column:
+                  name: wins
+                  type: int
+              - column:
+                  name: performance_score
+                  type: double
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    unique: true
+                    foreignKeyName: fk_stats_player
+                    references: players(id)
+
+  - changeSet:
+      id: 2
+      author: vardan
+      changes:
+        - addColumn:
+            tableName: player_stats
+            columns:
+              - column:
+                  name: cluster_id
+                  type: int
