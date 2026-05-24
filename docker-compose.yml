@@ -1,0 +1,148 @@
+# =============================================================
+# docker-compose.yml — player-analysis full stack
+#
+# Services:
+#   db       — MySQL 8.0 database
+#   backend  — Spring Boot REST API (Java 17)
+#   frontend — React SPA served by nginx (proxies /api to backend)
+#
+# Networks:
+#   app-network — internal bridge; db and backend are NOT
+#                 exposed to the host directly (security)
+#
+# Volumes:
+#   mysql-data  — persistent MySQL data directory
+#   csv-data    — shared volume for players.csv
+# =============================================================
+
+services:
+
+  # -----------------------------------------------------------
+  # DATABASE — MySQL 8.0
+  # -----------------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: player-analysis-db
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    ports:
+      # Only expose to localhost — never 0.0.0.0 in production
+      - "127.0.0.1:3306:3306"
+
+    volumes:
+      # Persist MySQL data across container restarts/rebuilds
+      - mysql-data:/var/lib/mysql
+
+    networks:
+      - app-network
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "${MYSQL_USER}", "--password=${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+    # MySQL performance tuning for a small analytical app
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=256M
+
+  # -----------------------------------------------------------
+  # BACKEND — Spring Boot 3.5 / Java 17
+  # -----------------------------------------------------------
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: player-analysis-backend
+    restart: unless-stopped
+
+    environment:
+      # Database connection — uses Docker service name "db" as host
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: "false"
+
+      # Path to the CSV file inside the container
+      # Matches COPY target in backend Dockerfile
+      APP_IMPORT_FILE_PATH: /app/data/players.csv
+
+      # Spring profile (use 'prod' to suppress verbose SQL in logs)
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+
+    ports:
+      # Backend API accessible on localhost only
+      # nginx proxies /api/* from the frontend container internally
+      - "127.0.0.1:8080:8080"
+
+    networks:
+      - app-network
+
+    # CRITICAL: Backend must not start until MySQL is healthy
+    # Without this, Liquibase tries to run migrations on a DB
+    # that isn't ready yet → connection refused crash
+    depends_on:
+      db:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/api/dashboard || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # -----------------------------------------------------------
+  # FRONTEND — React + nginx
+  # -----------------------------------------------------------
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        # In production, the frontend calls /api/* which nginx
+        # proxies to the backend — no hardcoded localhost!
+        VITE_API_URL: /api
+    container_name: player-analysis-frontend
+    restart: unless-stopped
+
+    ports:
+      # Frontend publicly accessible on port 80
+      - "0.0.0.0:3000:80"
+
+    networks:
+      - app-network
+
+    # Wait for backend to be healthy before starting nginx
+    # (optional but avoids 502 errors on very first load)
+    depends_on:
+      backend:
+        condition: service_healthy
+
+# -----------------------------------------------------------
+# NETWORKS
+# -----------------------------------------------------------
+networks:
+  app-network:
+    driver: bridge
+    # Isolate containers from other Docker networks on the host
+    internal: false
+
+# -----------------------------------------------------------
+# VOLUMES
+# -----------------------------------------------------------
+volumes:
+  mysql-data:
+    driver: local
