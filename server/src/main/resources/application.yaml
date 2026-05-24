@@ -1,26 +1,49 @@
+# =============================================================
+# application.yaml — production-ready Spring Boot config
+#
+# ALL sensitive values are read from environment variables.
+# Defaults (after the colon) are only used for local development.
+#
+# HOW TO USE LOCALLY (without Docker):
+#   Set env vars in your IDE run config or shell:
+#   export SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/player_analyzer?createDatabaseIfNotExist=true
+#   export SPRING_DATASOURCE_USERNAME=vardan
+#   export SPRING_DATASOURCE_PASSWORD=Vardan_2026!
+#   export APP_IMPORT_FILE_PATH=/absolute/path/to/players.csv
+# =============================================================
+
 spring:
   application:
     name: diploma-project
+
   datasource:
-    url: jdbc:mysql://localhost:3306/player_analyzer?createDatabaseIfNotExist=true
-    username: vardan
-    password: Vardan_2026!
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/player_analyzer?createDatabaseIfNotExist=true}
+    username: ${SPRING_DATASOURCE_USERNAME:vardan}
+    password: ${SPRING_DATASOURCE_PASSWORD:Vardan_2026!}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      # Connection pool sizing for a small analytical app
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+
   jpa:
-    show-sql: true
+    # Disable SQL logging in production — set to true for debugging
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
+        format_sql: false
     hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
 
-      ddl-auto: validate
   liquibase:
-
     change-log: classpath:db/changelog/db.changelog-master.yaml
-
 
 app:
   import:
     file:
-      path: /home/vardan/Desktop/HelloJava/diploma-project/players.csv
+      # In Docker: /app/data/players.csv (set by docker-compose env)
+      # Locally:   absolute path to your players.csv
+      path: ${APP_IMPORT_FILE_PATH:/app/data/players.csv}

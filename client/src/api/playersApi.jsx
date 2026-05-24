@@ -1,6 +1,25 @@
+// =============================================================
+// playersApi.jsx — fixed version
+//
+// PROBLEM IN ORIGINAL:
+//   const API_URL = "http://localhost:8080/api"
+//   This hardcoded URL breaks in Docker because the frontend
+//   container cannot reach "localhost:8080" — that's the HOST
+//   machine, not the backend container.
+//
+// FIX:
+//   Use import.meta.env.VITE_API_URL with a fallback.
+//   - In Docker production: VITE_API_URL=/api (nginx proxies it)
+//   - In local dev:         VITE_API_URL=http://localhost:8080/api
+//
+// HOW TO SET FOR LOCAL DEV:
+//   Create client/.env.local:
+//     VITE_API_URL=http://localhost:8080/api
+// =============================================================
+
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080/api";
 
 export const getTopPlayers = (size) => {
     return axios.get(`${API_URL}/players/top`, {
