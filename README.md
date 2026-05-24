@@ -2,9 +2,10 @@
 
 ![Java](https://img.shields.io/badge/Java-17-007396?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?style=flat-square&logo=springboot&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=flat-square&logo=vite&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 > A full-stack information system for analysing and predicting football player performance using machine learning methods — built as a university diploma project and backend portfolio piece.
@@ -22,7 +23,8 @@ The system ingests real player statistics, applies **linear regression** to comp
 - [Backend API Overview](#backend-api-overview)
 - [Frontend Overview](#frontend-overview)
 - [Database & Data Import](#database--data-import)
-- [How to Run Locally](#how-to-run-locally)
+- [🐳 Running with Docker (Recommended)](#-running-with-docker-recommended)
+- [How to Run Locally (Without Docker)](#how-to-run-locally-without-docker)
 - [Project Structure](#project-structure)
 - [Screenshots](#screenshots)
 - [What I Learned](#what-i-learned)
@@ -40,6 +42,7 @@ The system ingests real player statistics, applies **linear regression** to comp
 - **REST API** — Well-structured Spring Boot API serves dashboard statistics, top performers, positional filters, cluster data, and full-text search.
 - **React Dashboard** — Interactive single-page application presenting analytics visually, with routing, search, and cluster visualisation pages.
 - **CSV Data Import** — Real player data from `players.csv` is loaded and managed via Liquibase database migrations, ensuring a reproducible setup.
+- **Docker Support** — Full containerisation with Docker Compose for a one-command setup of the entire stack.
 
 ---
 
@@ -52,10 +55,11 @@ The system ingests real player statistics, applies **linear regression** to comp
 | **Database** | MySQL 8, Liquibase (migrations) |
 | **ML / Statistics** | Apache Commons Math 3 (OLS linear regression, K-Means clustering) |
 | **Build Tool** | Apache Maven |
-| **Utilities** | Lombok, MapStruct-style manual mappers, DTO pattern |
-| **Frontend Framework** | React 18 + Vite |
-| **Frontend Libraries** | React Router, Axios |
-| **Styling** | CSS Modules / plain CSS |
+| **Utilities** | Lombok, manual mappers, DTO pattern |
+| **Frontend Framework** | React 19 + Vite 8 |
+| **Frontend Libraries** | React Router 7, Axios |
+| **Styling** | Plain CSS |
+| **Containerisation** | Docker, Docker Compose, nginx |
 
 ---
 
@@ -128,16 +132,14 @@ Base path: `http://localhost:8080/api`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/dashboard` | Summary statistics: total players, average score, top score, cluster distribution, top performers |
+| `GET` | `/dashboard` | Summary statistics: total players, average score, top score |
+| `GET` | `/dashboard/clusters` | Cluster distribution counts |
 | `GET` | `/players` | Paginated list of all players |
 | `GET` | `/players/{id}` | Single player detail with stats and score |
 | `GET` | `/players/top` | Top N players by performance score |
-| `GET` | `/players/search?q=` | Full-text player search by name |
-| `GET` | `/players/position?pos=` | Filter players by position |
-| `GET` | `/clusters` | All cluster groups with their assigned players |
-| `GET` | `/clusters/{id}` | Players belonging to a specific cluster |
-
-> **Note:** Exact endpoint paths may vary slightly — refer to the controller classes in `/src` for the authoritative routes.
+| `GET` | `/players/search?name=` | Player search by name |
+| `GET` | `/players/position?position=` | Filter players by position with pagination |
+| `GET` | `/players/role/{clusterId}` | Players belonging to a specific cluster |
 
 ---
 
@@ -147,61 +149,222 @@ The React + Vite frontend is a single-page application with client-side routing 
 
 | Page | Route | Description |
 |------|-------|-------------|
-| **Dashboard** | `/` | KPI cards (total players, avg score, top score), cluster distribution, top performers table |
-| **Players** | `/players` | Full player list with position filter |
-| **Search** | `/search` | Live search by player name |
+| **Dashboard** | `/` | KPI cards (total players, avg score, top score), cluster distribution, top performers |
+| **Top Players** | `/top-players` | Ranked leaderboard with position filter |
+| **All Players** | `/players` | Full player list with search and pagination |
 | **Clusters** | `/clusters` | K-Means cluster groups and their members |
-| **Top Players** | `/top` | Ranked leaderboard of highest-scoring players |
-
-All data is fetched from the backend API using **Axios**. The application is configured through `client/package.json` and `vite.config.js`, with a dev proxy pointing to the Spring Boot server.
+| **Player Detail** | `/players/:id` | Individual player stats and performance score |
 
 ---
 
 ## Database & Data Import
 
 - **MySQL 8** is the primary relational database. The schema covers three main entities: `Player`, `PlayerStats`, and `Team`.
-- **Liquibase** manages all schema migrations and initial data seeding, ensuring the database state is always reproducible across environments.
-- **`players.csv`** (located in the project root) contains the raw player dataset. On first startup (or via a dedicated import mechanism), this data is parsed, validated, and persisted to the database, after which the ML models are trained.
-
-To set up the database, create a MySQL schema (e.g. `diploma_db`) and configure the connection in `src/main/resources/application.properties` before running the backend.
+- **Liquibase** manages all schema migrations, ensuring the database state is always reproducible across environments.
+- **`players.csv`** contains the raw Premier League player dataset (571 players, 48 statistical columns). On first startup this data is automatically parsed, persisted to the database, and the ML pipeline runs immediately — no manual steps needed.
 
 ---
 
-## How to Run Locally
+## 🐳 Running with Docker (Recommended)
+
+Docker is the fastest and most reliable way to run the entire stack. A single command starts MySQL, the Spring Boot backend, and the React frontend — no need to install Java, Maven, Node.js, or MySQL locally.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac / Windows) or Docker Engine + Docker Compose plugin (Linux)
+- That's it.
+
+---
+
+### Step 1 — Clone the repository
+
+```bash
+git clone https://github.com/vardan2112001/player-analysis.git
+cd player-analysis
+```
+
+### Step 2 — Create your environment file
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and set your passwords (or leave the defaults for local testing):
+
+```env
+MYSQL_ROOT_PASSWORD=rootpassword123
+MYSQL_DATABASE=player_analyzer
+MYSQL_USER=player_app
+MYSQL_PASSWORD=apppassword456
+SPRING_PROFILES_ACTIVE=prod
+```
+
+> ⚠️ Never commit the `.env` file to git. It's already in `.gitignore`.
+
+### Step 3 — Make sure players.csv is in the server folder
+
+```bash
+# If players.csv is only at the project root, copy it:
+cp players.csv server/players.csv
+```
+
+### Step 4 — Build and start everything
+
+```bash
+docker compose up --build
+```
+
+This single command will:
+1. Pull MySQL 8.0 image
+2. Build the Spring Boot backend (Maven multi-stage build inside Docker)
+3. Build the React frontend (npm build + nginx)
+4. Start all three containers in the correct order
+5. Run Liquibase migrations automatically
+6. Seed the database from `players.csv`
+7. Train the regression and K-Means models
+
+**First build takes ~3–5 minutes** (Maven downloads dependencies). Subsequent builds are fast due to Docker layer caching.
+
+### Step 5 — Open the app
+
+| Service | URL |
+|---------|-----|
+| **Frontend (React app)** | http://localhost |
+| **Backend API** | http://localhost:8080/api |
+| **Dashboard endpoint** | http://localhost:8080/api/dashboard |
+
+---
+
+### Useful Docker commands
+
+```bash
+# Run in background (detached mode)
+docker compose up --build -d
+
+# Watch logs from all containers
+docker compose logs -f
+
+# Watch only backend logs
+docker compose logs -f backend
+
+# Check container status and health
+docker compose ps
+
+# Stop all containers (keeps database data)
+docker compose down
+
+# Stop and DELETE all data (full reset)
+docker compose down -v
+
+# Rebuild only one service after a code change
+docker compose up --build backend
+```
+
+---
+
+### How the containers connect
+
+```
+Your Browser
+     │
+     │  http://localhost:80
+     ▼
+┌──────────────────────────────────┐
+│  frontend (nginx :80)            │
+│                                  │
+│  /           → React SPA files   │
+│  /api/*      → proxy → backend   │
+└─────────────────┬────────────────┘
+                  │  internal Docker network
+                  │  http://backend:8080/api/*
+                  ▼
+┌──────────────────────────────────┐
+│  backend (Spring Boot :8080)     │
+│                                  │
+│  Reads  /app/data/players.csv    │
+│  Connects to  db:3306            │
+└─────────────────┬────────────────┘
+                  │  internal Docker network
+                  │  jdbc:mysql://db:3306/...
+                  ▼
+┌──────────────────────────────────┐
+│  db (MySQL 8.0 :3306)            │
+│  Data persisted in named volume  │
+└──────────────────────────────────┘
+```
+
+The database and backend ports are bound to `127.0.0.1` only — they are not accessible from outside the machine. Only the frontend (port 80) is public-facing.
+
+---
+
+### Troubleshooting Docker
+
+**Backend crashes on startup with "Communications link failure"**
+MySQL wasn't ready in time. Just restart the backend:
+```bash
+docker compose restart backend
+```
+
+**App loads but shows no players / empty dashboard**
+The CSV wasn't found at startup. Verify:
+```bash
+docker compose exec backend ls /app/data/
+# Should show: players.csv
+docker compose logs backend | grep -i "csv\|seed\|import"
+```
+
+**Port 80 already in use**
+Something else is using port 80. Change the frontend port in `docker-compose.yml`:
+```yaml
+ports:
+  - "8090:80"   # app will be at http://localhost:8090
+```
+
+**Full reset (database schema issues)**
+```bash
+docker compose down -v   # deletes the MySQL volume
+docker compose up --build
+```
+
+---
+
+## How to Run Locally (Without Docker)
 
 ### Prerequisites
 
 - Java 17 (JDK)
 - Apache Maven 3.8+
-- MySQL 8.x (running locally or via Docker)
+- MySQL 8.x (running locally)
 - Node.js 18+ and npm
-
----
 
 ### 1. Database Setup
 
 ```sql
-CREATE DATABASE diploma_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE player_analyzer CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 2. Backend Configuration
 
-Edit `src/main/resources/application.properties`:
+Edit `server/src/main/resources/application.yaml`:
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/diploma_db
-spring.datasource.username=YOUR_MYSQL_USER
-spring.datasource.password=YOUR_MYSQL_PASSWORD
-spring.jpa.hibernate.ddl-auto=validate
-spring.liquibase.enabled=true
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/player_analyzer?createDatabaseIfNotExist=true
+    username: YOUR_MYSQL_USER
+    password: YOUR_MYSQL_PASSWORD
+
+app:
+  import:
+    file:
+      path: /absolute/path/to/players.csv
 ```
 
 ### 3. Run the Backend
 
 ```bash
-# From the project root
-./mvnw clean install
-./mvnw spring-boot:run
+cd server
+./mvnw clean spring-boot:run
 ```
 
 The API will be available at `http://localhost:8080`.
@@ -221,31 +384,37 @@ The React app will be available at `http://localhost:5173`.
 ## Project Structure
 
 ```
-project-diploma/
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/example/diploma/
-│       │       ├── controller/       # REST controllers
-│       │       ├── service/          # Business & ML logic
-│       │       ├── repository/       # Spring Data JPA repositories
-│       │       ├── entity/           # JPA entities (Player, PlayerStats, Team)
-│       │       ├── dto/              # Request/response DTOs
-│       │       ├── mapper/           # Entity ↔ DTO mappers
-│       │       ├── strategy/         # Position-based scoring strategies
-│       │       └── trainer/          # Per-position regression trainers
-│       └── resources/
-│           ├── application.properties
-│           └── db/changelog/         # Liquibase migration files
+player-analysis/
+├── server/                           # Spring Boot backend
+│   ├── src/main/java/com/project/
+│   │   ├── controller/               # REST controllers
+│   │   ├── service/                  # Business & ML logic
+│   │   │   └── impl/                 # Service implementations
+│   │   ├── repository/               # Spring Data JPA repositories
+│   │   ├── entity/                   # JPA entities (Player, PlayerStats, Team)
+│   │   ├── dto/                      # Request/response DTOs
+│   │   ├── mapper/                   # Entity ↔ DTO mappers
+│   │   ├── strategy/                 # Position-based scoring strategies
+│   │   ├── trainer/                  # Per-position regression trainers
+│   │   ├── enums/                    # Position enum
+│   │   ├── config/                   # Startup listener (pipeline orchestration)
+│   │   └── exceptions/               # Global exception handler
+│   ├── src/main/resources/
+│   │   ├── application.yaml          # Spring Boot configuration
+│   │   └── db/changelog/             # Liquibase migration files
+│   ├── players.csv                   # Source dataset (571 Premier League players)
+│   ├── Dockerfile                    # Multi-stage backend image
+│   └── pom.xml
 ├── client/                           # React + Vite frontend
 │   ├── src/
-│   │   ├── pages/                    # Dashboard, Players, Search, Clusters, TopPlayers
-│   │   ├── components/               # Shared UI components
-│   │   └── api/                      # Axios API client
-│   ├── package.json
-│   └── vite.config.js
-├── players.csv                       # Source dataset
-├── pom.xml                           # Maven build configuration
+│   │   ├── pages/                    # Dashboard, TopPlayers, AllPlayersPage, Clusters, Player
+│   │   ├── components/               # ClusterDistribution, TopPlayersByScore, Sidebar, etc.
+│   │   └── api/                      # Axios API client (playersApi.jsx)
+│   ├── Dockerfile                    # Multi-stage frontend image (nginx)
+│   ├── nginx.conf                    # nginx config: SPA routing + /api proxy
+│   └── package.json
+├── docker-compose.yml                # Orchestrates all 3 services
+├── .env.example                      # Environment variable template
 └── README.md
 ```
 
@@ -276,6 +445,7 @@ project-diploma/
 - **Applied ML without a dedicated ML framework** — Implementing OLS linear regression and K-Means clustering using Apache Commons Math within a standard Java/Spring application.
 - **Database migrations with Liquibase** — Managing schema evolution and data seeding in a repeatable, version-controlled way.
 - **Full-stack integration** — Connecting a React SPA to a Spring Boot API, handling CORS, Axios configuration, and client-side routing.
+- **Docker & containerisation** — Multi-stage Dockerfiles, Docker Compose service orchestration, nginx reverse proxying, and environment variable management.
 - **Data engineering basics** — Parsing, cleaning, and importing CSV data into a relational schema.
 
 ---
@@ -285,10 +455,10 @@ project-diploma/
 - **Authentication & authorisation** — Add Spring Security with JWT so the system can support multiple users or roles (e.g., analyst vs. read-only viewer).
 - **Model persistence** — Serialise trained regression models to disk so they do not need to be retrained on every application restart.
 - **More sophisticated ML** — Explore Random Forest or Gradient Boosting (via a Python microservice or ONNX model) for potentially higher prediction accuracy.
-- **Interactive charts** — Integrate a charting library (e.g., Recharts or Chart.js) on the frontend for richer visualisation of cluster distributions and performance trends.
+- **Interactive charts** — Integrate a charting library (e.g., Recharts or Chart.js) for richer visualisation of cluster distributions and performance trends.
 - **REST API documentation** — Add Springdoc / Swagger UI for auto-generated, interactive API docs.
-- **Docker Compose** — Containerise the backend and database for a one-command local setup.
 - **Unit & integration tests** — Expand test coverage with JUnit 5 and Mockito for the service and strategy layers.
+- **CI/CD pipeline** — GitHub Actions workflow to build Docker images and push to Docker Hub on every merge to main.
 
 ---
 
